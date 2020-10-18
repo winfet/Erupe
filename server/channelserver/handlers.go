@@ -1093,7 +1093,7 @@ func handleMsgMhfSavedata(s *Session, p mhfpacket.MHFPacket) {
 
 	s.logger.Info("Wrote recompressed savedata back to DB.")
 
-	dumpSaveData(s, pkt.RawDataPayload, "")
+	dumpSaveDataWithCharId(s, pkt.RawDataPayload, "", fmt.Sprintf("%d",characterSaveData.CharID))
 
 	// Temporary server launcher response stuff
 	// 0x1F715	Weapon Class
@@ -1121,15 +1121,18 @@ func handleMsgMhfSavedata(s *Session, p mhfpacket.MHFPacket) {
 
 	doAckSimpleSucceed(s, pkt.AckHandle, []byte{0x00, 0x00, 0x00, 0x00})
 }
-
 func dumpSaveData(s *Session, data []byte, suffix string) {
+	dumpSaveDataWithCharId(s,data,suffix,"")
+}
+
+func dumpSaveDataWithCharId(s *Session, data []byte, suffix string, charid string) {
 	if !s.server.erupeConfig.DevModeOptions.SaveDumps.Enabled {
 		return
 	}
 
 	err := ioutil.WriteFile(fmt.Sprintf(
-		"%s\\%d%s.bin",
-		s.server.erupeConfig.DevModeOptions.SaveDumps.OutputDir, time.Now().Unix(), suffix), data,
+		"%s/%d%s_%s.bin",
+		s.server.erupeConfig.DevModeOptions.SaveDumps.OutputDir, time.Now().Unix(), suffix, charid), data,
 		0644,
 	)
 
